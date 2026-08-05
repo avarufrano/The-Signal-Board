@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#17130d">
   <title>The Signal Board</title>
@@ -12,115 +13,200 @@
 </head>
 <body>
   <main class="cabinet">
-    <header class="masthead">
+    <header>
       <div>
         <div class="kicker">NEW YORK CITY RAPID TRANSIT</div>
         <h1>THE SIGNAL BOARD</h1>
         <div class="subtitle">LIVE SUBWAY OPERATIONS • FIVE BOROUGHS</div>
       </div>
-      <div class="clock-box">
+      <div class="header-right">
         <div id="clock" class="clock">--:--</div>
         <div id="date" class="date">---</div>
-        <div id="dataLamp" class="lamp-row"><span class="lamp"></span><span>CONNECTING</span></div>
+        <div id="connection" class="connection demo"><i></i><span>DEMONSTRATION</span></div>
       </div>
     </header>
 
-    <nav id="routeFilters" class="route-filters" aria-label="Subway route filters"></nav>
+    <button id="settingsButton" class="gear" type="button" aria-label="Open settings">⚙</button>
 
-    <section class="board-grid">
-      <section class="map-panel">
-        <div class="plate-label">SYSTEM DIAGRAM • LIVE TRAIN INDICATION</div>
+    <nav id="routeFilters" class="filters" aria-label="Filter subway routes"></nav>
+
+    <section class="workarea">
+      <section class="map-shell">
+        <div class="engraved-label">SYSTEM DIAGRAM • LIVE TRAIN INDICATION</div>
         <div id="map"></div>
-        <div class="map-key">
-          <span><i class="key-dot live"></i> Live train</span>
-          <span><i class="key-dot station"></i> Station</span>
-          <span><i class="key-dot selected"></i> Selected service</span>
+        <div class="legend">
+          <span><i class="legend-train"></i> Train indication</span>
+          <span><i class="legend-station"></i> Station</span>
+          <span>Position between stations is estimated from MTA arrival predictions</span>
         </div>
       </section>
 
-      <aside class="dispatch-panel">
-        <div class="plate-label">DISPATCH TELEGRAPH</div>
-
-        <section class="selected-card">
-          <div class="selected-top">
-            <span id="selectedBullet" class="route-bullet neutral">—</span>
+      <aside>
+        <section class="telegraph">
+          <div class="engraved-label">DISPATCH TELEGRAPH</div>
+          <div class="trip-heading">
+            <span id="tripBullet" class="bullet neutral">—</span>
             <div>
-              <div id="selectedTitle" class="selected-title">AWAITING SIGNAL</div>
-              <div id="selectedDirection" class="selected-direction">Live feed not yet connected</div>
+              <strong id="tripTitle">AWAITING SIGNAL</strong>
+              <small id="tripDirection">Select a train indication</small>
             </div>
           </div>
-          <div class="track-display">
-            <div class="track-line"></div>
-            <div class="track-station current"></div>
-            <div class="track-station next"></div>
+
+          <div class="track">
+            <span class="rail"></span>
+            <span class="signal current"></span>
+            <span class="signal next"></span>
           </div>
-          <div class="station-pair">
-            <div>
-              <small>LAST REPORTED</small>
-              <strong id="fromStation">—</strong>
-            </div>
-            <div class="arrow">→</div>
-            <div>
-              <small>NEXT STATION</small>
-              <strong id="toStation">—</strong>
-            </div>
+
+          <div class="stations">
+            <div><small>LAST REPORTED</small><strong id="fromStation">—</strong></div>
+            <b>→</b>
+            <div><small>NEXT STATION</small><strong id="toStation">—</strong></div>
           </div>
-          <div class="arrival-row">
-            <span>ESTIMATED ARRIVAL</span>
-            <strong id="arrival">—</strong>
-          </div>
+
+          <div class="eta"><span>ESTIMATED ARRIVAL</span><strong id="eta">—</strong></div>
         </section>
 
-        <section class="instrument-grid">
-          <div class="instrument"><span>TRAINS VISIBLE</span><strong id="trainCount">0</strong></div>
-          <div class="instrument"><span>LINES ACTIVE</span><strong id="lineCount">0</strong></div>
-          <div class="instrument"><span>FEED AGE</span><strong id="feedAge">—</strong></div>
-          <div class="instrument"><span>MODE</span><strong id="modeLabel">DEMO</strong></div>
+        <section class="meters">
+          <div><span>TRAINS</span><strong id="trainCount">0</strong></div>
+          <div><span>LINES</span><strong id="lineCount">0</strong></div>
+          <div><span>FEED AGE</span><strong id="feedAge">—</strong></div>
+          <div><span>MODE</span><strong id="mode">DEMO</strong></div>
         </section>
 
-        <section class="status-box">
-          <div class="section-heading">LINE STATUS</div>
-          <div id="statusList" class="status-list"></div>
+        <section class="services">
+          <div class="engraved-label static">LINE INDICATORS</div>
+          <div id="serviceList"></div>
         </section>
 
-        <section class="ticker-wrap">
-          <div class="section-heading">DISPATCH NOTICE</div>
-          <div id="ticker" class="ticker">Preparing the system diagram…</div>
+        <section class="notice">
+          <div class="engraved-label static">DISPATCH NOTICE</div>
+          <div id="noticeText">Preparing the system diagram…</div>
         </section>
       </aside>
     </section>
 
     <footer>
       <span id="updated">NOT YET UPDATED</span>
-      <span>THE SIGNAL BOARD • PRIVATE DISPLAY</span>
-      <button id="settingsButton" type="button">SETTINGS</button>
+      <span>INDEPENDENT PRIVATE DISPLAY • NOT AN OFFICIAL MTA PRODUCT</span>
     </footer>
   </main>
 
-  <dialog id="settingsDialog">
-    <div class="settings-content">
-      <h2>Signal Board Settings</h2>
-      <label>Cloudflare Worker address
-        <input id="workerInput" placeholder="https://your-worker.workers.dev">
-      </label>
-      <p>The Worker relays the MTA’s GTFS-Realtime feeds to this static GitHub Pages display. Leave blank to use the animated demonstration.</p>
-      <label>Map focus
-        <select id="focusInput">
-          <option value="system">Entire system</option>
-          <option value="manhattan">Manhattan</option>
-          <option value="brooklyn">Brooklyn</option>
-          <option value="queens">Queens</option>
-          <option value="bronx">Bronx</option>
-        </select>
-      </label>
-      <div class="settings-actions">
-        <button id="demoButton" type="button">USE DEMO</button>
-        <button id="cancelButton" type="button">CANCEL</button>
-        <button id="saveButton" type="button" class="save">SAVE</button>
+  <div id="scrim" class="scrim" hidden></div>
+  <aside id="settingsPanel" class="settings-panel" aria-hidden="true">
+    <div class="settings-head">
+      <div>
+        <div class="kicker">CONTROL CABINET</div>
+        <h2>Signal Board Settings</h2>
       </div>
+      <button id="closeSettings" type="button" aria-label="Close settings">×</button>
     </div>
-  </dialog>
 
+    <label>
+      Cloudflare Worker address
+      <input id="workerInput" type="url" placeholder="https://signal-board-api.example.workers.dev">
+    </label>
+    <p class="help">Paste the base <strong>.workers.dev</strong> address. The board adds <code>https://</code> automatically when needed. Do not add <code>/feed</code>.</p>
+
+    <label>
+      Map focus
+      <select id="focusInput">
+        <option value="system">Entire system</option>
+        <option value="manhattan">Manhattan</option>
+        <option value="brooklyn">Brooklyn</option>
+        <option value="queens">Queens</option>
+        <option value="bronx">Bronx</option>
+      </select>
+    </label>
+
+    <div class="test-box">
+      <div id="testStatus">Worker has not been tested.</div>
+      <button id="testWorker" type="button">TEST CONNECTION</button>
+    </div>
+
+    <div class="settings-actions">
+      <button id="demoMode" type="button">USE DEMONSTRATION</button>
+      <button id="saveSettings" class="primary" type="button">SAVE & CONNECT</button>
+    </div>
+  </aside>
+
+  <script>
+    // Settings controls are deliberately independent from all map/feed libraries.
+    (() => {
+      const panel = document.getElementById("settingsPanel");
+      const scrim = document.getElementById("scrim");
+      const worker = document.getElementById("workerInput");
+      const focus = document.getElementById("focusInput");
+      const testStatus = document.getElementById("testStatus");
+
+      function readSettings() {
+        try {
+          return JSON.parse(localStorage.getItem("signal-board-v3") || '{"worker":"","focus":"system"}');
+        } catch (_) {
+          return { worker: "", focus: "system" };
+        }
+      }
+      function normalizeWorker(value) {
+        let result = String(value || "").trim().replace(/\/+$/, "");
+        if (result && !/^https?:\/\//i.test(result)) result = "https://" + result;
+        return result;
+      }
+      function open() {
+        const saved = readSettings();
+        worker.value = saved.worker || "";
+        focus.value = saved.focus || "system";
+        panel.classList.add("open");
+        panel.setAttribute("aria-hidden", "false");
+        scrim.hidden = false;
+      }
+      function close() {
+        panel.classList.remove("open");
+        panel.setAttribute("aria-hidden", "true");
+        scrim.hidden = true;
+      }
+
+      document.getElementById("settingsButton").addEventListener("click", open);
+      document.getElementById("closeSettings").addEventListener("click", close);
+      scrim.addEventListener("click", close);
+
+      document.getElementById("testWorker").addEventListener("click", async () => {
+        const base = normalizeWorker(worker.value);
+        worker.value = base;
+        if (!base) {
+          testStatus.textContent = "Enter the Worker address first.";
+          testStatus.dataset.state = "bad";
+          return;
+        }
+        testStatus.textContent = "Testing…";
+        testStatus.dataset.state = "";
+        try {
+          const response = await fetch(base + "/feed?name=gtfs", { cache: "no-store" });
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          const bytes = await response.arrayBuffer();
+          if (bytes.byteLength < 20) throw new Error("Response was unexpectedly small");
+          testStatus.textContent = "Connection successful — MTA feed received.";
+          testStatus.dataset.state = "good";
+        } catch (error) {
+          testStatus.textContent = "Connection failed: " + error.message;
+          testStatus.dataset.state = "bad";
+        }
+      });
+
+      document.getElementById("saveSettings").addEventListener("click", () => {
+        const saved = { worker: normalizeWorker(worker.value), focus: focus.value };
+        localStorage.setItem("signal-board-v3", JSON.stringify(saved));
+        close();
+        window.dispatchEvent(new CustomEvent("signal-settings-changed", { detail: saved }));
+      });
+
+      document.getElementById("demoMode").addEventListener("click", () => {
+        const saved = { worker: "", focus: focus.value };
+        localStorage.setItem("signal-board-v3", JSON.stringify(saved));
+        close();
+        window.dispatchEvent(new CustomEvent("signal-settings-changed", { detail: saved }));
+      });
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="app.js"></script>
 </body>
