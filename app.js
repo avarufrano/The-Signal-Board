@@ -1,5 +1,6 @@
 
-import { transit_realtime } from "https://cdn.jsdelivr.net/npm/gtfs-realtime-bindings@1.1.1/+esm";
+import gtfsRealtime from "https://cdn.jsdelivr.net/npm/gtfs-realtime-bindings@1.1.1/+esm";
+const { transit_realtime } = gtfsRealtime;
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 
 const ROUTES = {
