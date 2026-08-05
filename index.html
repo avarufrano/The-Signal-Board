@@ -1,1 +1,127 @@
-<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><link rel='stylesheet' href='style.css'><title>The Signal Board</title></head><body><div class='frame'><header><div><div class='small'>NEW YORK CITY SUBWAY</div><h1>THE SIGNAL BOARD</h1></div><div id='clock'></div></header><div class='layout'><div class='map'><svg viewBox='0 0 700 500'><g stroke='#b6863b' stroke-width='4' fill='none'><path d='M80 100H620'/><path d='M120 200H560'/><path d='M250 40V430'/><path d='M420 80V460'/><path d='M80 340H620'/></g><g id='stations' fill='#e7d9b8'></g><circle id='train' r='7' fill='#ffbf40'/></svg></div><div class='panel'><h2>LIVE STATUS</h2><p><span class='badge'>A</span> Uptown</p><p><b>59 St → 125 St</b></p><p>System: 🟢 Normal Service</p></div></div></div><script src='app.js'></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#17130d">
+  <title>The Signal Board</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+  <main class="cabinet">
+    <header class="masthead">
+      <div>
+        <div class="kicker">NEW YORK CITY RAPID TRANSIT</div>
+        <h1>THE SIGNAL BOARD</h1>
+        <div class="subtitle">LIVE SUBWAY OPERATIONS • FIVE BOROUGHS</div>
+      </div>
+      <div class="clock-box">
+        <div id="clock" class="clock">--:--</div>
+        <div id="date" class="date">---</div>
+        <div id="dataLamp" class="lamp-row"><span class="lamp"></span><span>CONNECTING</span></div>
+      </div>
+    </header>
+
+    <nav id="routeFilters" class="route-filters" aria-label="Subway route filters"></nav>
+
+    <section class="board-grid">
+      <section class="map-panel">
+        <div class="plate-label">SYSTEM DIAGRAM • LIVE TRAIN INDICATION</div>
+        <div id="map"></div>
+        <div class="map-key">
+          <span><i class="key-dot live"></i> Live train</span>
+          <span><i class="key-dot station"></i> Station</span>
+          <span><i class="key-dot selected"></i> Selected service</span>
+        </div>
+      </section>
+
+      <aside class="dispatch-panel">
+        <div class="plate-label">DISPATCH TELEGRAPH</div>
+
+        <section class="selected-card">
+          <div class="selected-top">
+            <span id="selectedBullet" class="route-bullet neutral">—</span>
+            <div>
+              <div id="selectedTitle" class="selected-title">AWAITING SIGNAL</div>
+              <div id="selectedDirection" class="selected-direction">Live feed not yet connected</div>
+            </div>
+          </div>
+          <div class="track-display">
+            <div class="track-line"></div>
+            <div class="track-station current"></div>
+            <div class="track-station next"></div>
+          </div>
+          <div class="station-pair">
+            <div>
+              <small>LAST REPORTED</small>
+              <strong id="fromStation">—</strong>
+            </div>
+            <div class="arrow">→</div>
+            <div>
+              <small>NEXT STATION</small>
+              <strong id="toStation">—</strong>
+            </div>
+          </div>
+          <div class="arrival-row">
+            <span>ESTIMATED ARRIVAL</span>
+            <strong id="arrival">—</strong>
+          </div>
+        </section>
+
+        <section class="instrument-grid">
+          <div class="instrument"><span>TRAINS VISIBLE</span><strong id="trainCount">0</strong></div>
+          <div class="instrument"><span>LINES ACTIVE</span><strong id="lineCount">0</strong></div>
+          <div class="instrument"><span>FEED AGE</span><strong id="feedAge">—</strong></div>
+          <div class="instrument"><span>MODE</span><strong id="modeLabel">DEMO</strong></div>
+        </section>
+
+        <section class="status-box">
+          <div class="section-heading">LINE STATUS</div>
+          <div id="statusList" class="status-list"></div>
+        </section>
+
+        <section class="ticker-wrap">
+          <div class="section-heading">DISPATCH NOTICE</div>
+          <div id="ticker" class="ticker">Preparing the system diagram…</div>
+        </section>
+      </aside>
+    </section>
+
+    <footer>
+      <span id="updated">NOT YET UPDATED</span>
+      <span>THE SIGNAL BOARD • PRIVATE DISPLAY</span>
+      <button id="settingsButton" type="button">SETTINGS</button>
+    </footer>
+  </main>
+
+  <dialog id="settingsDialog">
+    <div class="settings-content">
+      <h2>Signal Board Settings</h2>
+      <label>Cloudflare Worker address
+        <input id="workerInput" placeholder="https://your-worker.workers.dev">
+      </label>
+      <p>The Worker relays the MTA’s GTFS-Realtime feeds to this static GitHub Pages display. Leave blank to use the animated demonstration.</p>
+      <label>Map focus
+        <select id="focusInput">
+          <option value="system">Entire system</option>
+          <option value="manhattan">Manhattan</option>
+          <option value="brooklyn">Brooklyn</option>
+          <option value="queens">Queens</option>
+          <option value="bronx">Bronx</option>
+        </select>
+      </label>
+      <div class="settings-actions">
+        <button id="demoButton" type="button">USE DEMO</button>
+        <button id="cancelButton" type="button">CANCEL</button>
+        <button id="saveButton" type="button" class="save">SAVE</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
